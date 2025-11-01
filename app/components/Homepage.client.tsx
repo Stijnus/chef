@@ -1,6 +1,6 @@
 import { Chat } from './chat/Chat';
 import { ChefAuthProvider } from './chat/ChefAuthWrapper';
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useConvexChatHomepage } from '~/lib/stores/startup';
 import { Toaster } from '~/components/ui/Toaster';
 import { setPageLoadChatId } from '~/lib/stores/chatId';
@@ -13,7 +13,15 @@ export function Homepage() {
   // eventually replace this with a slug once we receive the first
   // artifact from the model if the user submits a prompt.
   const initialId = useRef(crypto.randomUUID());
-  setPageLoadChatId(initialId.current);
+  
+  // Initialize chatId synchronously before rendering to avoid race condition
+  if (initialId.current) {
+    try {
+      setPageLoadChatId(initialId.current);
+    } catch {
+      // Already set, ignore
+    }
+  }
   // NB: On this path, we render `ChatImpl` immediately.
   return (
     <>
